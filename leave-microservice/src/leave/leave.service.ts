@@ -60,19 +60,24 @@ export class LeaveService {
     }
   }
 
-  async checkEmployeeLeave(): Promise<any> {
+  async checkEmployeeLeave(limitOfDocs=0,toSkip=0): Promise<any> {
     await this.cacheManager.set('cached_item', { key: 3 });
     await this.cacheManager.get('cached_item');
-    return await this.leaveModel.find({}, userProjection).exec();
+    return await this.leaveModel.find({}, userProjection).skip(toSkip).limit(limitOfDocs).exec();
   }
 
-  async viewOwnLeave(data: leaveDto) {
+  async viewOwnLeave(data: leaveDto,limitOfDocs=0,toSkip=0) {
     try {
       await this.cacheManager.set('cached_item', { key: 4 });
       await this.cacheManager.get('cached_item');
       const existUser = await this.leaveModel
-        .find({ email: data.email }, userProjection)
+        .find({ email: data.email}, userProjection)
+        .skip(toSkip)
+        .limit(limitOfDocs)
         .exec();
+      if(existUser.length<limitOfDocs){
+        throw new HttpException('No leaves to show', HttpStatus.NOT_FOUND)
+      }
       if (existUser.length === 0) {
         throw new HttpException(
           `User with the email ${data.email}, Not apllied any leaves`,
@@ -92,13 +97,22 @@ export class LeaveService {
     }
   }
 
-  async viewEmployeePendingLeaveByEmail(data: leaveDto): Promise<any> {
+  async viewEmployeePendingLeaveByEmail(data: leaveDto,limitOfDocs=0,toSkip=0): Promise<any> {
     try {
       await this.cacheManager.set('cached_item', { key: 5 });
       await this.cacheManager.get('cached_item');
-      const existUser = await this.leaveModel
+      let existUser = await this.leaveModel
         .find({ email: data.email }, userProjection)
+        .skip(toSkip)
+        .limit(limitOfDocs)
         .exec();
+      if(!data.email){
+        existUser = await this.leaveModel
+        .find({}, userProjection)
+        .skip(toSkip)
+        .limit(limitOfDocs)
+        .exec();
+      }
       if (!existUser) {
         throw new HttpException('Invalid User ', HttpStatus.NOT_FOUND);
       } else if (existUser.length === 0) {
@@ -120,7 +134,7 @@ export class LeaveService {
     }
   }
 
-  async viewEmployeePendingLeave(data: leaveDto): Promise<any> {
+  async viewEmployeePendingLeave(data: leaveDto,limitOfDocs=0,toSkip=0): Promise<any> {
     try {
       await this.cacheManager.set('cached_item', { key: 6 });
       await this.cacheManager.get('cached_item');
@@ -132,6 +146,8 @@ export class LeaveService {
           status: statusEnum_key,
           rejected: { $exists: false },
         })
+        .skip(toSkip)
+        .limit(limitOfDocs)
         .exec();
       if (!existUser) {
         throw new HttpException('Invalid User ', HttpStatus.NOT_FOUND);
