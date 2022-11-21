@@ -148,23 +148,13 @@ export class UserService {
     }
   }
 
-  async getEmployee(req): Promise<user[]> {
+  async getEmployee(req,Email): Promise<user | user[]> {
     try {
-      await this.cacheManager.set('cached_item', { key: 1 });
-      await this.cacheManager.get('cached_item');
       await this.functionVerify(req.cookies['userlogoutcookie']);
+      if('email' in Email){
+        return this.userModel.findOne(Email).exec()
+      }
       return this.userModel.find().exec();
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
-    }
-  }
-
-  async getEmployeeByEmail(req, res, Email: string) {
-    try {
-      await this.cacheManager.set('cached_item', { key: 2 });
-      await this.cacheManager.get('cached_item');
-      await this.functionVerify(req.cookies['userlogoutcookie']);
-      return this.userModel.findOne({ email: Email }).exec();
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }
@@ -398,11 +388,11 @@ export class UserService {
     }
   }
 
-  async checkEmployeeLeave(req): Promise<any> {
+  async checkEmployeeLeave(req,limit,skip): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
       const pattern = { cmd: 'checkEmployeeLeave' };
-      const payload = {};
+      const payload = {limit:limit, skip:skip};
       const dummy = this.leaveClient.send(pattern, payload);
       return dummy;
 
@@ -412,13 +402,13 @@ export class UserService {
     }
   }
 
-  async viewOwnLeave(req): Promise<any> {
+  async viewOwnLeave(req,limit,skip): Promise<any> {
     try {
       const verifyUser = await this.functionVerify(
         req.cookies['userlogoutcookie'],
       );
       const pattern = { cmd: 'viewOwnLeave' };
-      const payload = { email: verifyUser.Email };
+      const payload = { email: verifyUser.Email, limit:limit, skip:skip};
       return this.leaveClient.send<string>(pattern, payload).pipe(
         map((output: any) => {
           if (output.status !== HttpStatus.OK) {
@@ -437,11 +427,11 @@ export class UserService {
     }
   }
 
-  async viewEmployeePendingLeaveByEmail(req, Email): Promise<any> {
+  async viewEmployeePendingLeaveByEmail(req, Email,limit,skip): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
       const pattern = { cmd: 'viewEmployeePendingLeaveByEmail' };
-      const payload = { email: Email };
+      const payload = { email: Email, limit:limit, skip:skip};
       return this.leaveClient.send<string>(pattern, payload).pipe(
         map((output: any) => {
           if (output.status !== HttpStatus.OK) {
@@ -460,11 +450,11 @@ export class UserService {
     }
   }
 
-  async viewEmployeePendingLeave(req, Status: string): Promise<any> {
+  async viewEmployeePendingLeave(req, Status: string,limit,skip): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
       const pattern = { cmd: 'viewEmployeePendingLeave' };
-      const payload = { status: Status };
+      const payload = { status: Status, limit:limit, skip:skip};
       return this.leaveClient.send<string>(pattern, payload).pipe(
         map((output: any) => {
           if (output.status !== HttpStatus.OK) {
@@ -482,7 +472,7 @@ export class UserService {
       throw new HttpException(error.message, error.status);
     }
   }
-
+  
   async approveEmployeeLeaves(Email: string, date: string, req): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);

@@ -33,6 +33,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('user')
 export class UserController {
@@ -76,25 +77,10 @@ export class UserController {
   @Get('employee')
   @Roles(UserRole.Admin)
   @ApiOkResponse({ description: 'All the employee details listed below' })
-  async getEmployee(@Req() req, @Res() res) {
+  async getEmployee(@Req() req, @Res() res,@Query() email:string) {
     res.status(HttpStatus.OK).json({
-      message: 'Employee Details',
-      result: await this.userService.getEmployee(req),
-    });
-  }
-
-  //access:admin, getting employee by email
-  @Get('employeeByEmail/:email')
-  @Roles(UserRole.Admin)
-  @ApiOkResponse({ description: 'Employee Detail' })
-  async getEmployeeByEmail(
-    @Req() req,
-    @Res() res,
-    @Param('email') email: string,
-  ) {
-    res.status(HttpStatus.OK).json({
-      message: `Employee details with Email: ${email}`,
-      result: await this.userService.getEmployeeByEmail(req, res, email),
+      message: 'Employee Details:',
+      result: await this.userService.getEmployee(req,email)
     });
   }
 
@@ -193,20 +179,12 @@ export class UserController {
     return await this.userService.applyLeave(req, leaveDto);
   }
 
-  //access:admin fetching all applied leaves
-  @Get('viewLeaves')
-  @Roles(UserRole.Admin)
-  @ApiOkResponse({ description: 'All Leave Details Displayed Below' })
-  public async checkEmployeeLeave(@Req() req) {
-    return await this.userService.checkEmployeeLeave(req);
-  }
-
   //For fetching employee his own leave status
   @Get('checkStatus')
   @ApiOkResponse({ description: 'Own Leaves' })
   @ApiNotFoundResponse({ description: 'Invalid User' })
-  async viewOwnLeave(@Req() req) {
-    return this.userService.viewOwnLeave(req);
+  async viewOwnLeave(@Req() req,@Query() {limit,skip}:PaginationDto) {
+    return this.userService.viewOwnLeave(req,limit,skip);
   }
 
   @Get('checkOwnDetails')
@@ -217,24 +195,22 @@ export class UserController {
   }
 
   //access:admin fetching pending leaves by email
-  @Get('viewPendingLeavesOfUser/:email')
+  @Get('view-leaves')
   @Roles(UserRole.Admin)
   @ApiOkResponse({ description: 'Pending Leaves' })
   @ApiNotFoundResponse({ description: 'No pending leaves or Invalid Email' })
   async viewEmployeePendingLeaveByEmail(
     @Req() req,
-    @Param('email') Email: string,
+    // @Param('email') Email: string,
+    @Query() {email,status,limit,skip}:PaginationDto
   ) {
-    return this.userService.viewEmployeePendingLeaveByEmail(req, Email);
-  }
-
-  //access:admin fetching pending leaves of all employees
-  @Get('viewPendingLeaves/:status')
-  @Roles(UserRole.Admin)
-  @ApiOkResponse({ description: 'All the pending leaves displayed' })
-  @ApiNotFoundResponse({ description: 'Invalid User' })
-  async viewEmployeePendingLeave(@Req() req, @Param('status') status: string) {
-    return this.userService.viewEmployeePendingLeave(req, status);
+    if(email){
+      return this.userService.viewEmployeePendingLeaveByEmail(req, email,limit,skip);
+    }
+    if(status){
+      return this.userService.viewEmployeePendingLeave(req, status,limit,skip);
+    }
+    return this.userService.viewEmployeePendingLeaveByEmail(req, email,limit,skip);
   }
 
   //access:admin For approving employee leaves
