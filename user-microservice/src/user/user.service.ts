@@ -148,11 +148,11 @@ export class UserService {
     }
   }
 
-  async getEmployee(req,Email): Promise<user | user[]> {
+  async getEmployee(req, Email): Promise<user | user[]> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
-      if('email' in Email){
-        return this.userModel.findOne(Email).exec()
+      if ('email' in Email) {
+        return this.userModel.findOne(Email).exec();
       }
       return this.userModel.find().exec();
     } catch (error) {
@@ -388,11 +388,11 @@ export class UserService {
     }
   }
 
-  async checkEmployeeLeave(req,limit,skip): Promise<any> {
+  async checkEmployeeLeave(req, limit, skip): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
       const pattern = { cmd: 'checkEmployeeLeave' };
-      const payload = {limit:limit, skip:skip};
+      const payload = { limit: limit, skip: skip };
       const dummy = this.leaveClient.send(pattern, payload);
       return dummy;
 
@@ -402,13 +402,13 @@ export class UserService {
     }
   }
 
-  async viewOwnLeave(req,limit,skip): Promise<any> {
+  async viewOwnLeave(req, limit, skip): Promise<any> {
     try {
       const verifyUser = await this.functionVerify(
         req.cookies['userlogoutcookie'],
       );
       const pattern = { cmd: 'viewOwnLeave' };
-      const payload = { email: verifyUser.Email, limit:limit, skip:skip};
+      const payload = { email: verifyUser.Email, limit: limit, skip: skip };
       return this.leaveClient.send<string>(pattern, payload).pipe(
         map((output: any) => {
           if (output.status !== HttpStatus.OK) {
@@ -427,11 +427,17 @@ export class UserService {
     }
   }
 
-  async viewEmployeePendingLeaveByEmail(req, Email,limit,skip): Promise<any> {
+  async viewEmployeePendingLeaveByEmail(req, Email, limit, skip): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
+      if (Email) {
+        const existUser = await this.userModel.findOne({ email: Email });
+        if (!existUser) {
+          throw new HttpException('Invalid User Email ', HttpStatus.NOT_FOUND);
+        }
+      }
       const pattern = { cmd: 'viewEmployeePendingLeaveByEmail' };
-      const payload = { email: Email, limit:limit, skip:skip};
+      const payload = { email: Email, limit: limit, skip: skip };
       return this.leaveClient.send<string>(pattern, payload).pipe(
         map((output: any) => {
           if (output.status !== HttpStatus.OK) {
@@ -450,11 +456,28 @@ export class UserService {
     }
   }
 
-  async viewEmployeePendingLeave(req, Status: string,limit,skip): Promise<any> {
+  async viewEmployeePendingLeave(
+    req,
+    email: string,
+    Status: string,
+    limit,
+    skip,
+  ): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
+      if (email) {
+        const existUser = await this.userModel.findOne({ email: email });
+        if (!existUser) {
+          throw new HttpException('Invalid User Email ', HttpStatus.NOT_FOUND);
+        }
+      }
       const pattern = { cmd: 'viewEmployeePendingLeave' };
-      const payload = { status: Status, limit:limit, skip:skip};
+      const payload = {
+        email: email,
+        status: Status,
+        limit: limit,
+        skip: skip,
+      };
       return this.leaveClient.send<string>(pattern, payload).pipe(
         map((output: any) => {
           if (output.status !== HttpStatus.OK) {
@@ -472,7 +495,7 @@ export class UserService {
       throw new HttpException(error.message, error.status);
     }
   }
-  
+
   async approveEmployeeLeaves(Email: string, date: string, req): Promise<any> {
     try {
       await this.functionVerify(req.cookies['userlogoutcookie']);
