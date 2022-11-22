@@ -1,9 +1,9 @@
-export class PaginationDto{
-    readonly limit?: number
+export class PaginationDto {
+  readonly limit?: number;
 
-    readonly skip?: number
+  readonly skip?: number;
 
-    readonly email?: string
+  readonly email?: string;
 
-    readonly status?: string
+  readonly status?: string;
 }

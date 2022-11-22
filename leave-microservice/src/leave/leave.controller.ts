@@ -21,13 +21,13 @@ export class LeaveController {
   }
 
   @MessagePattern({ cmd: 'checkEmployeeLeave' })
-  async checkEmployeeLeave(data: leaveDto,@Ctx() Context: RmqContext) {
+  async checkEmployeeLeave(data: leaveDto, @Ctx() Context: RmqContext) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
     channel.ack(originalMessage);
     return {
       message: 'details',
-      result: await this.leaveService.checkEmployeeLeave(data.limit,data.skip),
+      result: await this.leaveService.checkEmployeeLeave(data.limit, data.skip),
     };
   }
 
@@ -36,7 +36,7 @@ export class LeaveController {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
     channel.ack(originalMessage);
-    return await this.leaveService.viewOwnLeave(data,data.limit,data.skip);
+    return await this.leaveService.viewOwnLeave(data, data.limit, data.skip);
   }
 
   @MessagePattern({ cmd: 'viewEmployeePendingLeaveByEmail' })
@@ -47,7 +47,11 @@ export class LeaveController {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
     channel.ack(originalMessage);
-    return await this.leaveService.viewEmployeePendingLeaveByEmail(data,data.limit,data.skip);
+    return await this.leaveService.viewEmployeePendingLeaveByEmail(
+      data,
+      data.limit,
+      data.skip,
+    );
   }
 
   @MessagePattern({ cmd: 'viewEmployeePendingLeave' })
@@ -58,7 +62,11 @@ export class LeaveController {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
     channel.ack(originalMessage);
-    return await this.leaveService.viewEmployeePendingLeave(data,data.limit,data.skip);
+    return await this.leaveService.viewEmployeePendingLeave(
+      data,
+      data.limit,
+      data.skip,
+    );
   }
 
   @MessagePattern({ cmd: 'approveEmployeeLeaves' })

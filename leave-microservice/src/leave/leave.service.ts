@@ -60,23 +60,27 @@ export class LeaveService {
     }
   }
 
-  async checkEmployeeLeave(limitOfDocs=0,toSkip=0): Promise<any> {
+  async checkEmployeeLeave(limitOfDocs = 0, toSkip = 0): Promise<any> {
     await this.cacheManager.set('cached_item', { key: 3 });
     await this.cacheManager.get('cached_item');
-    return await this.leaveModel.find({}, userProjection).skip(toSkip).limit(limitOfDocs).exec();
+    return await this.leaveModel
+      .find({}, userProjection)
+      .skip(toSkip)
+      .limit(limitOfDocs)
+      .exec();
   }
 
-  async viewOwnLeave(data: leaveDto,limitOfDocs=0,toSkip=0) {
+  async viewOwnLeave(data: leaveDto, limitOfDocs = 0, toSkip = 0) {
     try {
       await this.cacheManager.set('cached_item', { key: 4 });
       await this.cacheManager.get('cached_item');
       const existUser = await this.leaveModel
-        .find({ email: data.email}, userProjection)
+        .find({ email: data.email }, userProjection)
         .skip(toSkip)
         .limit(limitOfDocs)
         .exec();
-      if(existUser.length<limitOfDocs){
-        throw new HttpException('No leaves to show', HttpStatus.NOT_FOUND)
+      if (existUser.length < limitOfDocs) {
+        throw new HttpException('No leaves to show', HttpStatus.NOT_FOUND);
       }
       if (existUser.length === 0) {
         throw new HttpException(
@@ -97,7 +101,11 @@ export class LeaveService {
     }
   }
 
-  async viewEmployeePendingLeaveByEmail(data: leaveDto,limitOfDocs=0,toSkip=0): Promise<any> {
+  async viewEmployeePendingLeaveByEmail(
+    data: leaveDto,
+    limitOfDocs = 0,
+    toSkip = 0,
+  ): Promise<any> {
     try {
       await this.cacheManager.set('cached_item', { key: 5 });
       await this.cacheManager.get('cached_item');
@@ -106,12 +114,12 @@ export class LeaveService {
         .skip(toSkip)
         .limit(limitOfDocs)
         .exec();
-      if(!data.email){
+      if (!data.email) {
         existUser = await this.leaveModel
-        .find({}, userProjection)
-        .skip(toSkip)
-        .limit(limitOfDocs)
-        .exec();
+          .find({}, userProjection)
+          .skip(toSkip)
+          .limit(limitOfDocs)
+          .exec();
       }
       if (!existUser) {
         throw new HttpException('Invalid User ', HttpStatus.NOT_FOUND);
@@ -121,11 +129,19 @@ export class LeaveService {
           HttpStatus.NOT_FOUND,
         );
       }
-      return {
-        message: `Details of user with status ${data.email}`,
-        result: existUser,
-        status: HttpStatus.OK,
-      };
+      if (data.email) {
+        return {
+          message: `Details of user with status ${data.email}`,
+          result: existUser,
+          status: HttpStatus.OK,
+        };
+      } else {
+        return {
+          message: `Details of users with status `,
+          result: existUser,
+          status: HttpStatus.OK,
+        };
+      }
     } catch (error) {
       return {
         status: error.status,
@@ -134,21 +150,39 @@ export class LeaveService {
     }
   }
 
-  async viewEmployeePendingLeave(data: leaveDto,limitOfDocs=0,toSkip=0): Promise<any> {
+  async viewEmployeePendingLeave(
+    data: leaveDto,
+    limitOfDocs = 0,
+    toSkip = 0,
+  ): Promise<any> {
     try {
       await this.cacheManager.set('cached_item', { key: 6 });
       await this.cacheManager.get('cached_item');
       const statusEnum_key = Object.keys(statusEnum).find(
         (key) => statusEnum[key] === data.status,
       );
-      const existUser = await this.leaveModel
-        .find({
-          status: statusEnum_key,
-          rejected: { $exists: false },
-        })
-        .skip(toSkip)
-        .limit(limitOfDocs)
-        .exec();
+      let existUser;
+      if (!data.email) {
+        existUser = await this.leaveModel
+          .find({
+            status: statusEnum_key,
+            rejected: { $exists: false },
+          })
+          .skip(toSkip)
+          .limit(limitOfDocs)
+          .exec();
+      } else {
+        existUser = await this.leaveModel
+          .find({
+            email: data.email,
+            status: statusEnum_key,
+            rejected: { $exists: false },
+          })
+          .skip(toSkip)
+          .limit(limitOfDocs)
+          .exec();
+      }
+
       if (!existUser) {
         throw new HttpException('Invalid User ', HttpStatus.NOT_FOUND);
       }
@@ -156,17 +190,25 @@ export class LeaveService {
         for (let i = 0; i < existUser.length; i++) {
           existUser[
             i
-          ].approveLink = `http://localhost:3000/user/approveLeaves?leaveDate=${existUser[i].leaveDate}&email=${existUser[i].email}`;
+          ].approveLink = `http://localhost:3000/user/approve-leaves?leaveDate=${existUser[i].leaveDate}&email=${existUser[i].email}`;
           existUser[
             i
-          ].rejectLink = `http://localhost:3000/user/rejectLeaves?leaveDate=${existUser[i].leaveDate}&email=${existUser[i].email}`;
+          ].rejectLink = `http://localhost:3000/user/reject-leaves?leaveDate=${existUser[i].leaveDate}&email=${existUser[i].email}`;
           existUser[i].save();
         }
-      return {
-        message: `Details of user with status ${data.status}`,
-        result: existUser,
-        status: HttpStatus.OK,
-      };
+      if (!data.email) {
+        return {
+          message: `Details of user with status ${data.status}`,
+          result: existUser,
+          status: HttpStatus.OK,
+        };
+      } else {
+        return {
+          message: `Details of user with email ${data.email} and status ${data.status}`,
+          result: existUser,
+          status: HttpStatus.OK,
+        };
+      }
     } catch (error) {
       return {
         status: error.status,
@@ -184,13 +226,13 @@ export class LeaveService {
           email: data.email,
           leaveDate: IsoDate,
           status: false,
-          approveLink: `http://localhost:3000/user/approveLeaves?leaveDate=${IsoDate}&email=${data.email}`,
+          approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&email=${data.email}`,
         },
         {
           $set: { status: true },
           $unset: {
-            approveLink: `http://localhost:3000/user/approveLeaves?leaveDate=${IsoDate}&email=${data.email}`,
-            rejectLink: `http://localhost:3000/user/rejectLeaves?leaveDate=${IsoDate}&email=${data.email}`,
+            approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&email=${data.email}`,
+            rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&email=${data.email}`,
           },
         },
       );
@@ -219,12 +261,12 @@ export class LeaveService {
           email: data.email,
           leaveDate: IsoDate,
           status: false,
-          rejectLink: `http://localhost:3000/user/rejectLeaves?leaveDate=${IsoDate}&email=${data.email}`,
+          rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&email=${data.email}`,
         },
         {
           $unset: {
-            approveLink: `http://localhost:3000/user/approveLeaves?leaveDate=${IsoDate}&email=${data.email}`,
-            rejectLink: `http://localhost:3000/user/rejectLeaves?leaveDate=${IsoDate}&email=${data.email}`,
+            approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&email=${data.email}`,
+            rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&email=${data.email}`,
           },
         },
       );

@@ -34,6 +34,7 @@ import {
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { PaginationDto } from './dto/pagination.dto';
+import { stat } from 'fs';
 
 @Controller('user')
 export class UserController {
@@ -77,15 +78,15 @@ export class UserController {
   @Get('employee')
   @Roles(UserRole.Admin)
   @ApiOkResponse({ description: 'All the employee details listed below' })
-  async getEmployee(@Req() req, @Res() res,@Query() email:string) {
+  async getEmployee(@Req() req, @Res() res, @Query() email: string) {
     res.status(HttpStatus.OK).json({
       message: 'Employee Details:',
-      result: await this.userService.getEmployee(req,email)
+      result: await this.userService.getEmployee(req, email),
     });
   }
 
   //access:admin update employee details Input:json{userId,salary,designation}
-  @Patch('updateEmployee/:email')
+  @Patch('update-employee/:email')
   @Roles(UserRole.Admin)
   @ApiOkResponse({ description: 'Employee Details Updated' })
   @ApiNotFoundResponse({ description: 'Designation Not Found' })
@@ -102,7 +103,7 @@ export class UserController {
   }
 
   //update employee details Input:json{name,email,address,phonenumber}
-  @Patch('updateEmployeeUser')
+  @Patch('update-employee-user')
   @ApiOkResponse({ description: 'Employee Details Updated' })
   @ApiNotFoundResponse({ description: 'Invalid User Email' })
   async updateOwnInfo(
@@ -135,7 +136,7 @@ export class UserController {
   }
 
   //access:admin soft deleting the user/employee
-  @Patch('deleteUser/:email')
+  @Patch('delete-user/:email')
   @Roles(UserRole.Admin)
   @ApiOkResponse({ description: 'User Disabled' })
   @ApiForbiddenResponse({ description: 'User is already disabled' })
@@ -151,7 +152,7 @@ export class UserController {
   }
 
   //access:admin activating the user/employee
-  @Patch('activateUser/:email')
+  @Patch('activate-user/:email')
   @Roles(UserRole.Admin)
   @ApiOkResponse({ description: 'User Activated' })
   @ApiForbiddenResponse({ description: 'User Account is already active' })
@@ -167,7 +168,7 @@ export class UserController {
   }
 
   // For applying leave Input:json{leaveDate:"YYYY-MM-DD"}
-  @Post('applyLeave')
+  @Post('apply-leave')
   @ApiCreatedResponse({ description: 'Leave applied successfully' })
   @ApiBadRequestResponse({
     description: 'leaveDate must be in the format yyyy-mm-dd',
@@ -180,14 +181,14 @@ export class UserController {
   }
 
   //For fetching employee his own leave status
-  @Get('checkStatus')
+  @Get('check-status')
   @ApiOkResponse({ description: 'Own Leaves' })
   @ApiNotFoundResponse({ description: 'Invalid User' })
-  async viewOwnLeave(@Req() req,@Query() {limit,skip}:PaginationDto) {
-    return this.userService.viewOwnLeave(req,limit,skip);
+  async viewOwnLeave(@Req() req, @Query() { limit, skip }: PaginationDto) {
+    return this.userService.viewOwnLeave(req, limit, skip);
   }
 
-  @Get('checkOwnDetails')
+  @Get('check-own-details')
   @ApiOkResponse({ description: 'Details' })
   @ApiNotFoundResponse({ description: 'Invalid User' })
   async viewOwnDetails(@Req() req, @Res() res) {
@@ -202,19 +203,44 @@ export class UserController {
   async viewEmployeePendingLeaveByEmail(
     @Req() req,
     // @Param('email') Email: string,
-    @Query() {email,status,limit,skip}:PaginationDto
+    @Query() { email, status, limit, skip }: PaginationDto,
   ) {
-    if(email){
-      return this.userService.viewEmployeePendingLeaveByEmail(req, email,limit,skip);
+    if (email && status) {
+      return this.userService.viewEmployeePendingLeave(
+        req,
+        email,
+        status,
+        limit,
+        skip,
+      );
     }
-    if(status){
-      return this.userService.viewEmployeePendingLeave(req, status,limit,skip);
+    if (email) {
+      return this.userService.viewEmployeePendingLeaveByEmail(
+        req,
+        email,
+        limit,
+        skip,
+      );
     }
-    return this.userService.viewEmployeePendingLeaveByEmail(req, email,limit,skip);
+    if (status) {
+      return this.userService.viewEmployeePendingLeave(
+        req,
+        email,
+        status,
+        limit,
+        skip,
+      );
+    }
+    return this.userService.viewEmployeePendingLeaveByEmail(
+      req,
+      email,
+      limit,
+      skip,
+    );
   }
 
   //access:admin For approving employee leaves
-  @Patch('approveLeaves')
+  @Patch('approve-leaves')
   @Roles(UserRole.Admin)
   @ApiCreatedResponse({ description: 'Leave Approved' })
   async approveEmployeeLeaves(
@@ -229,7 +255,7 @@ export class UserController {
   }
 
   //access:admin For rejecting employee leaves
-  @Patch('rejectLeaves')
+  @Patch('reject-leaves')
   @Roles(UserRole.Admin)
   @ApiCreatedResponse({ description: 'Leave Rejected' })
   @ApiGoneResponse({ description: 'Link Expired' })
