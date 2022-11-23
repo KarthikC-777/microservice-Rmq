@@ -34,7 +34,6 @@ import {
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { PaginationDto } from './dto/pagination.dto';
-import { stat } from 'fs';
 
 @Controller('user')
 export class UserController {
