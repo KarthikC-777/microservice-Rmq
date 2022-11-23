@@ -6,4 +6,4 @@ export const user_name = process.env.USER_NAME || 'guest';
 export const password = process.env.PASSWORD || 'guest';
 export const virtual_host = '/';
 export const queue_name = 'User-Queue';
-export const rmq_host = process.env.RMQ_HOST || 'localhost:5672';
+export const rmq_host = process.env.RMQ_HOST || '127.0.0.1:5672';

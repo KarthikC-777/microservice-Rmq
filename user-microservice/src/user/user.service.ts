@@ -150,6 +150,8 @@ export class UserService {
 
   async getEmployee(req, Email): Promise<user | user[]> {
     try {
+      await this.cacheManager.set('cached_item',{key:1});
+      const cachedItem=await this.cacheManager.get('cached_item')
       await this.functionVerify(req.cookies['userlogoutcookie']);
       if ('email' in Email) {
         return this.userModel.findOne(Email).exec();

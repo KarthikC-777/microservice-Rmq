@@ -61,7 +61,7 @@ export class LeaveService {
   }
 
   async checkEmployeeLeave(limitOfDocs = 0, toSkip = 0): Promise<any> {
-    await this.cacheManager.set('cached_item', { key: 3 });
+    await this.cacheManager.set('cached_item', { key: 2 });
     await this.cacheManager.get('cached_item');
     return await this.leaveModel
       .find({}, userProjection)
@@ -72,7 +72,7 @@ export class LeaveService {
 
   async viewOwnLeave(data: leaveDto, limitOfDocs = 0, toSkip = 0) {
     try {
-      await this.cacheManager.set('cached_item', { key: 4 });
+      await this.cacheManager.set('cached_item', { key: 3 });
       await this.cacheManager.get('cached_item');
       const existUser = await this.leaveModel
         .find({ email: data.email }, userProjection)
@@ -107,7 +107,7 @@ export class LeaveService {
     toSkip = 0,
   ): Promise<any> {
     try {
-      await this.cacheManager.set('cached_item', { key: 5 });
+      await this.cacheManager.set('cached_item', { key: 4 });
       await this.cacheManager.get('cached_item');
       let links = {};
       let documents = await this.leaveModel.find(
@@ -175,8 +175,8 @@ export class LeaveService {
         return {
           message: `Details of user with status ${data.email}`,
           result: {
-            TotalCount: documents.length,
-            PageCount: existUser.length,
+            TotalDocument: documents.length,
+            NoOfDocument: existUser.length,
             existUser,
           },
           links: links,
@@ -200,8 +200,8 @@ export class LeaveService {
         return {
           message: `Details of users with status `,
           result: {
-            TotalCount: documents.length,
-            PageCount: existUser.length,
+            TotalDocument: documents.length,
+            NoOfDocument: existUser.length,
             existUser,
           },
           links: links,
@@ -222,7 +222,7 @@ export class LeaveService {
     toSkip = 0,
   ): Promise<any> {
     try {
-      await this.cacheManager.set('cached_item', { key: 6 });
+      await this.cacheManager.set('cached_item', { key: 5 });
       await this.cacheManager.get('cached_item');
       const statusEnum_key = Object.keys(statusEnum).find(
         (key) => statusEnum[key] === data.status,
@@ -314,8 +314,8 @@ export class LeaveService {
         return {
           message: `Details of user with status ${data.status}`,
           result: {
-            TotalCount: documents.length,
-            PageCount: existUser.length,
+            TotalDocument: documents.length,
+            NoOfDocument: existUser.length,
             existUser,
           },
           links: links,
@@ -339,8 +339,8 @@ export class LeaveService {
         return {
           message: `Details of user with email ${data.email} and status ${data.status}`,
           result: {
-            TotalCount: documents.length,
-            PageCount: existUser.length,
+            TotalDocument: documents.length,
+            NoOfDocument: existUser.length,
             existUser,
           },
           links: links,
