@@ -148,15 +148,15 @@ export class UserService {
     }
   }
 
-  async getEmployee(req, Email): Promise<user | user[]> {
+  async getEmployee(req, Email, limitofdocs=0, to_skip=0): Promise<user | user[]> {
     try {
       await this.cacheManager.set('cached_item',{key:1});
       const cachedItem=await this.cacheManager.get('cached_item')
       await this.functionVerify(req.cookies['userlogoutcookie']);
-      if ('email' in Email) {
-        return this.userModel.findOne(Email).exec();
+      if (Email) {
+        return this.userModel.findOne({email:Email}).exec();
       }
-      return this.userModel.find().exec();
+      return this.userModel.find().skip(to_skip).limit(limitofdocs).exec();
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

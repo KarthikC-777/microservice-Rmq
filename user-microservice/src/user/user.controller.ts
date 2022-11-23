@@ -80,10 +80,10 @@ export class UserController {
   @Get('employee')
   @Roles(UserRole.Admin)
   @ApiOkResponse({ description: 'All the employee details listed below' })
-  async getEmployee(@Req() req, @Res() res, @Query() email: string) {
+  async getEmployee(@Req() req, @Res() res, @Query() { email,limit, skip }: PaginationDto ) {
     res.status(HttpStatus.OK).json({
       message: 'Employee Details:',
-      result: await this.userService.getEmployee(req, email),
+      result: await this.userService.getEmployee(req, email,limit,skip),
     });
   }
 
