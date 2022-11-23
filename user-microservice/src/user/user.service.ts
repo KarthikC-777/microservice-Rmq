@@ -447,6 +447,7 @@ export class UserService {
               status: output.status,
               message: output.message,
               result: output.result,
+              links: output.links,
             };
           }
         }),
@@ -487,6 +488,7 @@ export class UserService {
               status: output.status,
               message: output.message,
               result: output.result,
+              links: output.links,
             };
           }
         }),

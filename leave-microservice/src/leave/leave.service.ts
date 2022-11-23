@@ -103,18 +103,50 @@ export class LeaveService {
 
   async viewEmployeePendingLeaveByEmail(
     data: leaveDto,
-    limitOfDocs = 0,
+    limitOfDocs = 3,
     toSkip = 0,
   ): Promise<any> {
     try {
       await this.cacheManager.set('cached_item', { key: 5 });
       await this.cacheManager.get('cached_item');
+      let links = {};
+      let documents = await this.leaveModel.find(
+        { email: data.email },
+        userProjection,
+      );
       let existUser = await this.leaveModel
         .find({ email: data.email }, userProjection)
         .skip(toSkip)
         .limit(limitOfDocs)
         .exec();
+      links = {
+        Start_Page: `http://localhost:3000/user/view-leaves?email=${data.email}&limit=${limitOfDocs}&skip=0`,
+      };
+      if (documents.length - limitOfDocs > limitOfDocs) {
+        links['End_Page'] = `http://localhost:3000/user/view-leaves?email=${
+          data.email
+        }&limit=${limitOfDocs}&skip=${documents.length - limitOfDocs}`;
+      } else {
+        links[
+          'End_Page'
+        ] = `http://localhost:3000/user/view-leaves?email=${data.email}&limit=${limitOfDocs}&skip=${limitOfDocs}`;
+      }
       if (!data.email) {
+        documents = await this.leaveModel.find({}, userProjection);
+        links = {
+          Start_Page: `http://localhost:3000/user/view-leaves?limit=${limitOfDocs}&skip=0`,
+        };
+        if (documents.length - limitOfDocs > limitOfDocs) {
+          links[
+            'End_Page'
+          ] = `http://localhost:3000/user/view-leaves?limit=${limitOfDocs}&skip=${
+            documents.length - limitOfDocs
+          }`;
+        } else {
+          links[
+            'End_Page'
+          ] = `http://localhost:3000/user/view-leaves?limit=${limitOfDocs}&skip=${limitOfDocs}`;
+        }
         existUser = await this.leaveModel
           .find({}, userProjection)
           .skip(toSkip)
@@ -130,15 +162,49 @@ export class LeaveService {
         );
       }
       if (data.email) {
+        if (toSkip - limitOfDocs >= 0)
+          links[
+            'Previous_Page'
+          ] = `http://localhost:3000/user/view-leaves?email=${
+            data.email
+          }&limit=${limitOfDocs}&skip=${toSkip - limitOfDocs}`;
+        if (Number(toSkip) + Number(limitOfDocs) < documents.length)
+          links['Next_Page'] = `http://localhost:3000/user/view-leaves?email=${
+            data.email
+          }&limit=${limitOfDocs}&skip=${Number(toSkip) + Number(limitOfDocs)}`;
         return {
           message: `Details of user with status ${data.email}`,
-          result: existUser,
+          result: {
+            TotalCount: documents.length,
+            PageCount: existUser.length,
+            existUser,
+          },
+          links: links,
           status: HttpStatus.OK,
         };
       } else {
+        if (toSkip - limitOfDocs >= 0) {
+          links[
+            'Previous_Page'
+          ] = `http://localhost:3000/user/view-leaves?limit=${limitOfDocs}&skip=${
+            toSkip - limitOfDocs
+          }`;
+        }
+        if (Number(toSkip) + Number(limitOfDocs) < documents.length) {
+          links[
+            'Next_Page'
+          ] = `http://localhost:3000/user/view-leaves?limit=${limitOfDocs}&skip=${
+            Number(toSkip) + Number(limitOfDocs)
+          }`;
+        }
         return {
           message: `Details of users with status `,
-          result: existUser,
+          result: {
+            TotalCount: documents.length,
+            PageCount: existUser.length,
+            existUser,
+          },
+          links: links,
           status: HttpStatus.OK,
         };
       }
@@ -152,7 +218,7 @@ export class LeaveService {
 
   async viewEmployeePendingLeave(
     data: leaveDto,
-    limitOfDocs = 0,
+    limitOfDocs = 3,
     toSkip = 0,
   ): Promise<any> {
     try {
@@ -161,8 +227,12 @@ export class LeaveService {
       const statusEnum_key = Object.keys(statusEnum).find(
         (key) => statusEnum[key] === data.status,
       );
-      let existUser;
+      let existUser, documents, links;
       if (!data.email) {
+        documents = await this.leaveModel.find(
+          { status: statusEnum_key, rejected: { $exists: false } },
+          userProjection,
+        );
         existUser = await this.leaveModel
           .find({
             status: statusEnum_key,
@@ -171,7 +241,27 @@ export class LeaveService {
           .skip(toSkip)
           .limit(limitOfDocs)
           .exec();
+        links = {
+          Start_Page: `http://localhost:3000/user/view-leaves?status=${data.status}&limit=${limitOfDocs}&skip=0`,
+        };
+        if (documents.length - limitOfDocs > limitOfDocs) {
+          links['End_Page'] = `http://localhost:3000/user/view-leaves?status=${
+            data.status
+          }&limit=${limitOfDocs}&skip=${documents.length - limitOfDocs}`;
+        } else {
+          links[
+            'End_Page'
+          ] = `http://localhost:3000/user/view-leaves?status=${data.status}&limit=${limitOfDocs}&skip=${limitOfDocs}`;
+        }
       } else {
+        documents = await this.leaveModel.find(
+          {
+            email: data.email,
+            status: statusEnum_key,
+            rejected: { $exists: false },
+          },
+          userProjection,
+        );
         existUser = await this.leaveModel
           .find({
             email: data.email,
@@ -181,6 +271,20 @@ export class LeaveService {
           .skip(toSkip)
           .limit(limitOfDocs)
           .exec();
+        links = {
+          Start_Page: `http://localhost:3000/user/view-leaves?status=${data.status}&email=${data.email}&limit=${limitOfDocs}&skip=0`,
+        };
+        if (documents.length - limitOfDocs > limitOfDocs) {
+          links['End_Page'] = `http://localhost:3000/user/view-leaves?status=${
+            data.status
+          }&email=${data.email}&limit=${limitOfDocs}&skip=${
+            documents.length - limitOfDocs
+          }`;
+        } else {
+          links[
+            'End_Page'
+          ] = `http://localhost:3000/user/view-leaves?status=${data.status}&email=${data.email}&limit=${limitOfDocs}&skip=${limitOfDocs}`;
+        }
       }
 
       if (!existUser) {
@@ -197,15 +301,49 @@ export class LeaveService {
           existUser[i].save();
         }
       if (!data.email) {
+        if (toSkip - limitOfDocs >= 0)
+          links[
+            'Previous_Page'
+          ] = `http://localhost:3000/user/view-leaves?status=${
+            data.status
+          }&limit=${limitOfDocs}&skip=${toSkip - limitOfDocs}`;
+        if (Number(toSkip) + Number(limitOfDocs) < documents.length)
+          links['Next_Page'] = `http://localhost:3000/user/view-leaves?status=${
+            data.status
+          }&limit=${limitOfDocs}&skip=${Number(toSkip) + Number(limitOfDocs)}`;
         return {
           message: `Details of user with status ${data.status}`,
-          result: existUser,
+          result: {
+            TotalCount: documents.length,
+            PageCount: existUser.length,
+            existUser,
+          },
+          links: links,
           status: HttpStatus.OK,
         };
       } else {
+        if (toSkip - limitOfDocs >= 0)
+          links[
+            'Previous_Page'
+          ] = `http://localhost:3000/user/view-leaves?status=${
+            data.status
+          }&email=${data.email}&limit=${limitOfDocs}&skip=${
+            toSkip - limitOfDocs
+          }`;
+        if (Number(toSkip) + Number(limitOfDocs) < documents.length)
+          links['Next_Page'] = `http://localhost:3000/user/view-leaves?status=${
+            data.status
+          }&email=${data.email}&limit=${limitOfDocs}&skip=${
+            Number(toSkip) + Number(limitOfDocs)
+          }`;
         return {
           message: `Details of user with email ${data.email} and status ${data.status}`,
-          result: existUser,
+          result: {
+            TotalCount: documents.length,
+            PageCount: existUser.length,
+            existUser,
+          },
+          links: links,
           status: HttpStatus.OK,
         };
       }
