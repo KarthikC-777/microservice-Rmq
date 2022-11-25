@@ -29,6 +29,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiGoneResponse,
+  ApiInternalServerErrorResponse,
   ApiNotAcceptableResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -46,6 +47,7 @@ export class UserController {
   @Post('register')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary:"Register a new Employee"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiCreatedResponse({ description: 'User Registered Successfully' })
   @ApiNotFoundResponse({ description: 'Designation Not Found' })
   @ApiConflictResponse({ description: 'Email already taken' })
@@ -63,6 +65,7 @@ export class UserController {
   @ApiForbiddenResponse({ description: 'You are already signed In' })
   @ApiNotFoundResponse({ description: 'Employee Not found' })
   @ApiBadRequestResponse({ description: 'Incorrect Password' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   async signin(@Req() req, @Res() res, @Body() userDto: loginDto) {
     res.status(HttpStatus.OK).json({
       message: 'Signed in Succesfully',
@@ -75,6 +78,7 @@ export class UserController {
   @ApiOperation({ summary:"Employee Logout"})
   @ApiOkResponse({ description: 'User logged out successfully' })
   @ApiForbiddenResponse({ description: 'You are already signed out' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   public async signout(@Req() req, @Res() res) {
     return this.userService.signout(req, res);
   }
@@ -84,6 +88,7 @@ export class UserController {
   @Roles(UserRole.Admin)
   @ApiOperation({ summary:"Getting all employee details or Individual employee detail (Admin Access)"})
   @ApiOkResponse({ description: 'All the employee details listed below' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   async getEmployee(@Req() req, @Res() res, @Query() userId: string) {
     res.status(HttpStatus.OK).json({
       message: 'Employee Details:',
@@ -97,6 +102,7 @@ export class UserController {
   @ApiOperation({ summary:"Update employee details {userId,salary,designation} (Admin Access)"})
   @ApiOkResponse({ description: 'Employee Details Updated' })
   @ApiNotFoundResponse({ description: 'Designation Not Found' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   async updateEmployee(
     @Req() req,
     @Res() res,
@@ -115,6 +121,7 @@ export class UserController {
   @ApiOperation({ summary:"Update employee details {name,email,address,phonenumber} (User Access)"})
   @ApiOkResponse({ description: 'Employee Details Updated' })
   @ApiNotFoundResponse({ description: 'Invalid User Email' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   async updateOwnInfo(
     @Req() req,
     @Res() res,
@@ -131,6 +138,7 @@ export class UserController {
   @Post('forgot-password')
   @ApiOperation({ summary: "Forgot Password (For getting reset password link Input {email})"})
   @ApiNotFoundResponse({ description: 'Email does not exist' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   public async forgotPassword(@Body() body: forgotDto, @Req() req, @Res() res) {
     res.send(await this.userService.forgotPassword(body, req, res));
   }
@@ -138,6 +146,7 @@ export class UserController {
   //For changing password Input:json{email, password}
   @Put('reset-password')
   @ApiOperation({ summary: "Reset Password (For changing password Input {email, password})"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   public async resetPassword(
     @Body() body: resetDto,
     @Req() req: Request,
@@ -152,6 +161,7 @@ export class UserController {
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: "Disable/Soft Delete a particular employee (Admin Access)"})
   @ApiOkResponse({ description: 'User Disabled' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiForbiddenResponse({ description: 'User is already disabled' })
   async deactivateEmployee(
     @Req() req,
@@ -170,6 +180,7 @@ export class UserController {
   @ApiOperation({ summary: "Enable/Activate a particular employee (Admin Access)"})
   @ApiOkResponse({ description: 'User Activated' })
   @ApiForbiddenResponse({ description: 'User Account is already active' })
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   async activateEmployee(
     @Req() req,
     @Res() res,
@@ -184,6 +195,7 @@ export class UserController {
   // For applying leave Input:json{leaveDate:"YYYY-MM-DD"}
   @Post('apply-leave')
   @ApiOperation({ summary: "Apply Leave Input {leaveDate:YYYY-MM-DD}"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiCreatedResponse({ description: 'Leave applied successfully' })
   @ApiBadRequestResponse({
     description: 'leaveDate must be in the format yyyy-mm-dd',
@@ -198,6 +210,7 @@ export class UserController {
   //For fetching employee his own leave status
   @Get('check-status')
   @ApiOperation({ summary: "Employee fetching there own leave status"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiOkResponse({ description: 'Own Leaves' })
   @ApiNotFoundResponse({ description: 'Invalid User' })
   async viewOwnLeave(@Req() req, @Query() { limit, skip }: PaginationDto) {
@@ -206,6 +219,7 @@ export class UserController {
 
   @Get('check-own-details')
   @ApiOperation({ summary: "Employee fetching there own details"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiOkResponse({ description: 'Details' })
   @ApiNotFoundResponse({ description: 'Invalid User' })
   async viewOwnDetails(@Req() req, @Res() res) {
@@ -216,6 +230,7 @@ export class UserController {
   @Get('view-leaves')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: "Fetching all the pending leaves by User ID (Admin Access)"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiOkResponse({ description: 'Pending Leaves' })
   @ApiNotFoundResponse({ description: 'No pending leaves or Invalid user Id' })
   async viewEmployeePendingLeaveByUserId(
@@ -260,6 +275,7 @@ export class UserController {
   @Patch('approve-leaves')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: "Approving pending leaves (Admin access)"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiCreatedResponse({ description: 'Leave Approved' })
   async approveEmployeeLeaves(
     @Req() req,
@@ -276,6 +292,7 @@ export class UserController {
   @Patch('reject-leaves')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: "Rejecting pending leaves (Admin access)"})
+  @ApiInternalServerErrorResponse({ description: "Internal Server Error"})
   @ApiCreatedResponse({ description: 'Leave Rejected' })
   @ApiGoneResponse({ description: 'Link Expired' })
   async rejectEmployeeLeaves(
