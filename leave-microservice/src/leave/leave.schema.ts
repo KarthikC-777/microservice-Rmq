@@ -10,6 +10,8 @@ export enum statusEnum {
 export class leave {
   @Prop({})
   email: string;
+  @Prop({})
+  userId: string;
 
   @Prop({ required: true })
   leaveDate: string;

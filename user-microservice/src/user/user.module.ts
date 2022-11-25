@@ -49,7 +49,7 @@ import {
     ]),
     CacheModule.register({
       isGlobal: true,
-      ttl: 10,
+      ttl: 4000,
       max: 100,
     }),
   ],

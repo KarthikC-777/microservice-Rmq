@@ -39,15 +39,15 @@ export class LeaveController {
     return await this.leaveService.viewOwnLeave(data, data.limit, data.skip);
   }
 
-  @MessagePattern({ cmd: 'viewEmployeePendingLeaveByEmail' })
-  async viewEmployeePendingLeaveByEmail(
+  @MessagePattern({ cmd: 'viewEmployeePendingLeaveByUserId' })
+  async viewEmployeePendingLeaveByUserId(
     @Payload() data: leaveDto,
     @Ctx() Context: RmqContext,
   ) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
     channel.ack(originalMessage);
-    return await this.leaveService.viewEmployeePendingLeaveByEmail(
+    return await this.leaveService.viewEmployeePendingLeaveByUserId(
       data,
       data.limit,
       data.skip,

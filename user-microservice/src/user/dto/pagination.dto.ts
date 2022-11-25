@@ -5,5 +5,7 @@ export class PaginationDto {
 
   readonly email?: string;
 
+  readonly userId?: string;
+
   readonly status?: string;
 }

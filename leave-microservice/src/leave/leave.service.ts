@@ -46,6 +46,7 @@ export class LeaveService {
       const newLeave = new this.leaveModel({
         email: data.email,
         leaveDate: newDate.toISOString(),
+        userId: data.userId,
       });
       await newLeave.save();
       return {
@@ -101,7 +102,7 @@ export class LeaveService {
     }
   }
 
-  async viewEmployeePendingLeaveByEmail(
+  async viewEmployeePendingLeaveByUserId(
     data: leaveDto,
     limitOfDocs = 3,
     toSkip = 0,
@@ -111,27 +112,27 @@ export class LeaveService {
       await this.cacheManager.get('cached_item');
       let links = {};
       let documents = await this.leaveModel.find(
-        { email: data.email },
+        { userId: data.userId },
         userProjection,
       );
       let existUser = await this.leaveModel
-        .find({ email: data.email }, userProjection)
+        .find({ userId: data.userId }, userProjection)
         .skip(toSkip)
         .limit(limitOfDocs)
         .exec();
       links = {
-        Start_Page: `http://localhost:3000/user/view-leaves?email=${data.email}&limit=${limitOfDocs}&skip=0`,
+        Start_Page: `http://localhost:3000/user/view-leaves?userId=${data.userId}&limit=${limitOfDocs}&skip=0`,
       };
       if (documents.length - limitOfDocs > limitOfDocs) {
-        links['End_Page'] = `http://localhost:3000/user/view-leaves?email=${
-          data.email
+        links['End_Page'] = `http://localhost:3000/user/view-leaves?userId=${
+          data.userId
         }&limit=${limitOfDocs}&skip=${documents.length - limitOfDocs}`;
       } else {
         links[
           'End_Page'
-        ] = `http://localhost:3000/user/view-leaves?email=${data.email}&limit=${limitOfDocs}&skip=${limitOfDocs}`;
+        ] = `http://localhost:3000/user/view-leaves?userId=${data.userId}&limit=${limitOfDocs}&skip=${limitOfDocs}`;
       }
-      if (!data.email) {
+      if (!data.userId) {
         documents = await this.leaveModel.find({}, userProjection);
         links = {
           Start_Page: `http://localhost:3000/user/view-leaves?limit=${limitOfDocs}&skip=0`,
@@ -157,26 +158,26 @@ export class LeaveService {
         throw new HttpException('Invalid User ', HttpStatus.NOT_FOUND);
       } else if (existUser.length === 0) {
         throw new HttpException(
-          'no Pending leaves or invalid email',
+          'no Pending leaves or invalid User Id ',
           HttpStatus.NOT_FOUND,
         );
       }
-      if (data.email) {
+      if (data.userId) {
         if (toSkip - limitOfDocs >= 0)
           links[
             'Previous_Page'
-          ] = `http://localhost:3000/user/view-leaves?email=${
-            data.email
+          ] = `http://localhost:3000/user/view-leaves?userId=${
+            data.userId
           }&limit=${limitOfDocs}&skip=${toSkip - limitOfDocs}`;
         if (Number(toSkip) + Number(limitOfDocs) < documents.length)
-          links['Next_Page'] = `http://localhost:3000/user/view-leaves?email=${
-            data.email
+          links['Next_Page'] = `http://localhost:3000/user/view-leaves?userId=${
+            data.userId
           }&limit=${limitOfDocs}&skip=${Number(toSkip) + Number(limitOfDocs)}`;
         return {
-          message: `Details of user with status ${data.email}`,
+          message: `Details of user with status ${data.userId}`,
           result: {
-            TotalDocument: documents.length,
-            NoOfDocument: existUser.length,
+            totalDocument: documents.length,
+            noOfDocument: existUser.length,
             existUser,
           },
           links: links,
@@ -200,8 +201,8 @@ export class LeaveService {
         return {
           message: `Details of users with status `,
           result: {
-            TotalDocument: documents.length,
-            NoOfDocument: existUser.length,
+            totalDocument: documents.length,
+            noOfDocument: existUser.length,
             existUser,
           },
           links: links,
@@ -228,7 +229,7 @@ export class LeaveService {
         (key) => statusEnum[key] === data.status,
       );
       let existUser, documents, links;
-      if (!data.email) {
+      if (!data.userId) {
         documents = await this.leaveModel.find(
           { status: statusEnum_key, rejected: { $exists: false } },
           userProjection,
@@ -256,7 +257,7 @@ export class LeaveService {
       } else {
         documents = await this.leaveModel.find(
           {
-            email: data.email,
+            userId: data.userId,
             status: statusEnum_key,
             rejected: { $exists: false },
           },
@@ -264,7 +265,7 @@ export class LeaveService {
         );
         existUser = await this.leaveModel
           .find({
-            email: data.email,
+            userId: data.userId,
             status: statusEnum_key,
             rejected: { $exists: false },
           })
@@ -272,35 +273,36 @@ export class LeaveService {
           .limit(limitOfDocs)
           .exec();
         links = {
-          Start_Page: `http://localhost:3000/user/view-leaves?status=${data.status}&email=${data.email}&limit=${limitOfDocs}&skip=0`,
+          Start_Page: `http://localhost:3000/user/view-leaves?status=${data.status}&userId=${data.userId}&limit=${limitOfDocs}&skip=0`,
         };
         if (documents.length - limitOfDocs > limitOfDocs) {
           links['End_Page'] = `http://localhost:3000/user/view-leaves?status=${
             data.status
-          }&email=${data.email}&limit=${limitOfDocs}&skip=${
+          }&userId=${data.userId}&limit=${limitOfDocs}&skip=${
             documents.length - limitOfDocs
           }`;
         } else {
           links[
             'End_Page'
-          ] = `http://localhost:3000/user/view-leaves?status=${data.status}&email=${data.email}&limit=${limitOfDocs}&skip=${limitOfDocs}`;
+          ] = `http://localhost:3000/user/view-leaves?status=${data.status}&userId=${data.userId}&limit=${limitOfDocs}&skip=${limitOfDocs}`;
         }
       }
 
       if (!existUser) {
         throw new HttpException('Invalid User ', HttpStatus.NOT_FOUND);
       }
+
       if (data.status === 'Pending')
         for (let i = 0; i < existUser.length; i++) {
           existUser[
             i
-          ].approveLink = `http://localhost:3000/user/approve-leaves?leaveDate=${existUser[i].leaveDate}&email=${existUser[i].email}`;
+          ].approveLink = `http://localhost:3000/user/approve-leaves?leaveDate=${existUser[i].leaveDate}&userId=${existUser[i].userId}`;
           existUser[
             i
-          ].rejectLink = `http://localhost:3000/user/reject-leaves?leaveDate=${existUser[i].leaveDate}&email=${existUser[i].email}`;
+          ].rejectLink = `http://localhost:3000/user/reject-leaves?leaveDate=${existUser[i].leaveDate}&userId=${existUser[i].userId}`;
           existUser[i].save();
         }
-      if (!data.email) {
+      if (!data.userId) {
         if (toSkip - limitOfDocs >= 0)
           links[
             'Previous_Page'
@@ -314,8 +316,8 @@ export class LeaveService {
         return {
           message: `Details of user with status ${data.status}`,
           result: {
-            TotalDocument: documents.length,
-            NoOfDocument: existUser.length,
+            totalDocument: documents.length,
+            noOfDocument: existUser.length,
             existUser,
           },
           links: links,
@@ -327,20 +329,20 @@ export class LeaveService {
             'Previous_Page'
           ] = `http://localhost:3000/user/view-leaves?status=${
             data.status
-          }&email=${data.email}&limit=${limitOfDocs}&skip=${
+          }&userId=${data.userId}&limit=${limitOfDocs}&skip=${
             toSkip - limitOfDocs
           }`;
         if (Number(toSkip) + Number(limitOfDocs) < documents.length)
           links['Next_Page'] = `http://localhost:3000/user/view-leaves?status=${
             data.status
-          }&email=${data.email}&limit=${limitOfDocs}&skip=${
+          }&userId=${data.userId}&limit=${limitOfDocs}&skip=${
             Number(toSkip) + Number(limitOfDocs)
           }`;
         return {
-          message: `Details of user with email ${data.email} and status ${data.status}`,
+          message: `Details of user with User Id ${data.userId} and status ${data.status}`,
           result: {
-            TotalDocument: documents.length,
-            NoOfDocument: existUser.length,
+            totalDocument: documents.length,
+            noOfDocument: existUser.length,
             existUser,
           },
           links: links,
@@ -361,16 +363,16 @@ export class LeaveService {
       const IsoDate = newDate.toISOString();
       const user = await this.leaveModel.findOneAndUpdate(
         {
-          email: data.email,
+          userId: data.userId,
           leaveDate: IsoDate,
           status: false,
-          approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&email=${data.email}`,
+          approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&userId=${data.userId}`,
         },
         {
           $set: { status: true },
           $unset: {
-            approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&email=${data.email}`,
-            rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&email=${data.email}`,
+            approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&userId=${data.userId}`,
+            rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&userId=${data.userId}`,
           },
         },
       );
@@ -396,15 +398,15 @@ export class LeaveService {
       const IsoDate = newDate.toISOString();
       const user = await this.leaveModel.findOneAndUpdate(
         {
-          email: data.email,
+          userId: data.userId,
           leaveDate: IsoDate,
           status: false,
-          rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&email=${data.email}`,
+          rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&userId=${data.userId}`,
         },
         {
           $unset: {
-            approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&email=${data.email}`,
-            rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&email=${data.email}`,
+            approveLink: `http://localhost:3000/user/approve-leaves?leaveDate=${IsoDate}&userId=${data.userId}`,
+            rejectLink: `http://localhost:3000/user/reject-leaves?leaveDate=${IsoDate}&userId=${data.userId}`,
           },
         },
       );
