@@ -32,6 +32,7 @@ import {
   ApiNotAcceptableResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { PaginationDto } from './dto/pagination.dto';
@@ -44,6 +45,7 @@ export class UserController {
   //For registering employee Input:json{name,email,address,password}
   @Post('register')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary:"Register a new Employee"})
   @ApiCreatedResponse({ description: 'User Registered Successfully' })
   @ApiNotFoundResponse({ description: 'Designation Not Found' })
   @ApiConflictResponse({ description: 'Email already taken' })
@@ -56,6 +58,7 @@ export class UserController {
 
   //For login Input:json{email,password}
   @Post('login')
+  @ApiOperation({ summary:"Employee Login"})
   @ApiOkResponse({ description: 'User Logged in' })
   @ApiForbiddenResponse({ description: 'You are already signed In' })
   @ApiNotFoundResponse({ description: 'Employee Not found' })
@@ -69,6 +72,7 @@ export class UserController {
 
   //For Logout
   @Delete('logout')
+  @ApiOperation({ summary:"Employee Logout"})
   @ApiOkResponse({ description: 'User logged out successfully' })
   @ApiForbiddenResponse({ description: 'You are already signed out' })
   public async signout(@Req() req, @Res() res) {
@@ -78,6 +82,7 @@ export class UserController {
   //access:admin, For getting all employee details
   @Get('employee')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary:"Getting all employee details or Individual employee detail (Admin Access)"})
   @ApiOkResponse({ description: 'All the employee details listed below' })
   async getEmployee(@Req() req, @Res() res, @Query() userId: string) {
     res.status(HttpStatus.OK).json({
@@ -89,6 +94,7 @@ export class UserController {
   //access:admin update employee details Input:json{userId,salary,designation}
   @Patch('update-employee/:userId')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary:"Update employee details {userId,salary,designation} (Admin Access)"})
   @ApiOkResponse({ description: 'Employee Details Updated' })
   @ApiNotFoundResponse({ description: 'Designation Not Found' })
   async updateEmployee(
@@ -106,6 +112,7 @@ export class UserController {
 
   //update employee details Input:json{name,email,address,phonenumber}
   @Patch('update-employee-user')
+  @ApiOperation({ summary:"Update employee details {name,email,address,phonenumber} (User Access)"})
   @ApiOkResponse({ description: 'Employee Details Updated' })
   @ApiNotFoundResponse({ description: 'Invalid User Email' })
   async updateOwnInfo(
@@ -122,6 +129,7 @@ export class UserController {
 
   //For getting resetpassword link Input:json{email}
   @Post('forgot-password')
+  @ApiOperation({ summary: "Forgot Password (For getting reset password link Input {email})"})
   @ApiNotFoundResponse({ description: 'Email does not exist' })
   public async forgotPassword(@Body() body: forgotDto, @Req() req, @Res() res) {
     res.send(await this.userService.forgotPassword(body, req, res));
@@ -129,6 +137,7 @@ export class UserController {
 
   //For changing password Input:json{email, password}
   @Put('reset-password')
+  @ApiOperation({ summary: "Reset Password (For changing password Input {email, password})"})
   public async resetPassword(
     @Body() body: resetDto,
     @Req() req: Request,
@@ -141,6 +150,7 @@ export class UserController {
   //access:admin soft deleting the user/employee
   @Patch('delete-user/:userId')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: "Disable/Soft Delete a particular employee (Admin Access)"})
   @ApiOkResponse({ description: 'User Disabled' })
   @ApiForbiddenResponse({ description: 'User is already disabled' })
   async deactivateEmployee(
@@ -157,6 +167,7 @@ export class UserController {
   //access:admin activating the user/employee
   @Patch('activate-user/:userId')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: "Enable/Activate a particular employee (Admin Access)"})
   @ApiOkResponse({ description: 'User Activated' })
   @ApiForbiddenResponse({ description: 'User Account is already active' })
   async activateEmployee(
@@ -172,6 +183,7 @@ export class UserController {
 
   // For applying leave Input:json{leaveDate:"YYYY-MM-DD"}
   @Post('apply-leave')
+  @ApiOperation({ summary: "Apply Leave Input {leaveDate:YYYY-MM-DD}"})
   @ApiCreatedResponse({ description: 'Leave applied successfully' })
   @ApiBadRequestResponse({
     description: 'leaveDate must be in the format yyyy-mm-dd',
@@ -185,6 +197,7 @@ export class UserController {
 
   //For fetching employee his own leave status
   @Get('check-status')
+  @ApiOperation({ summary: "Employee fetching there own leave status"})
   @ApiOkResponse({ description: 'Own Leaves' })
   @ApiNotFoundResponse({ description: 'Invalid User' })
   async viewOwnLeave(@Req() req, @Query() { limit, skip }: PaginationDto) {
@@ -192,6 +205,7 @@ export class UserController {
   }
 
   @Get('check-own-details')
+  @ApiOperation({ summary: "Employee fetching there own details"})
   @ApiOkResponse({ description: 'Details' })
   @ApiNotFoundResponse({ description: 'Invalid User' })
   async viewOwnDetails(@Req() req, @Res() res) {
@@ -201,6 +215,7 @@ export class UserController {
   //access:admin fetching pending leaves by user Id
   @Get('view-leaves')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: "Fetching all the pending leaves by User ID (Admin Access)"})
   @ApiOkResponse({ description: 'Pending Leaves' })
   @ApiNotFoundResponse({ description: 'No pending leaves or Invalid user Id' })
   async viewEmployeePendingLeaveByUserId(
@@ -244,6 +259,7 @@ export class UserController {
   //access:admin For approving employee leaves
   @Patch('approve-leaves')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: "Approving pending leaves (Admin access)"})
   @ApiCreatedResponse({ description: 'Leave Approved' })
   async approveEmployeeLeaves(
     @Req() req,
@@ -259,6 +275,7 @@ export class UserController {
   //access:admin For rejecting employee leaves
   @Patch('reject-leaves')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: "Rejecting pending leaves (Admin access)"})
   @ApiCreatedResponse({ description: 'Leave Rejected' })
   @ApiGoneResponse({ description: 'Link Expired' })
   async rejectEmployeeLeaves(
