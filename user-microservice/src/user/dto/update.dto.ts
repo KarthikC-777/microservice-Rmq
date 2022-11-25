@@ -50,7 +50,7 @@ export class UpdateDto {
 
   @IsOptional()
   @Length(2, 30, {
-    message: 'Provide proper address',
+    message: 'Provide proper address, Example: Banglore,Mumbai,Chennai.. ,..,',
   })
   readonly address: string;
 

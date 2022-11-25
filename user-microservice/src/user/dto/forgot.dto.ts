@@ -7,7 +7,7 @@ export class forgotDto {
     example: 'john@email.com',
   })
   @IsEmail({
-    message: 'Enter a valid email address',
+    message: 'Enter a valid email address , Example: <name>@gmail/email.com',
   })
   readonly email: string;
 }

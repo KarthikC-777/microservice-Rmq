@@ -24,7 +24,7 @@ export class UserDto {
     example: 'john@email.com',
   })
   @IsEmail({
-    message: 'Enter a valid email address',
+    message: 'Enter a valid email address, Example: <name>@gmail/email.com',
   })
   readonly email: string;
 
@@ -76,7 +76,7 @@ export class UserDto {
     example: 'California, US',
   })
   @Length(2, 30, {
-    message: 'Provide proper address',
+    message: 'Provide proper address, Example: Banglore,Mumbai,Chennai.. ,..,',
   })
   readonly address: string;
 

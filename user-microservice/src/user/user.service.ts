@@ -109,7 +109,7 @@ export class UserService {
       if (!checkUser) {
         throw new HttpException(
           'Incorrect Email',
-          HttpStatus.NON_AUTHORITATIVE_INFORMATION,
+          HttpStatus.BAD_REQUEST,
         );
       }
       if (checkUser.status == false) {

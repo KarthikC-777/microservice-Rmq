@@ -7,7 +7,7 @@ export class loginDto {
     example: 'dave@email.com',
   })
   @IsEmail({
-    message: 'Enter a valid email address',
+    message: 'Enter a valid email address , Example: <name>@gmail/email.com',
   })
   readonly email: string;
 
