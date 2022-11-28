@@ -1,0 +1,56 @@
+version: "4"
+
+services:
+  #mongodb services
+  mongo_db:
+    container_name: mongo_db
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+
+  rabbitmq3:
+    container_name: "rabbitmq"
+    image: rabbitmq:3.8-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=myuser
+      - RABBITMQ_DEFAULT_PASS=mypassword
+
+    ports:
+      # AMQP protocol port
+      - "5672:5672"
+      # HTTP management UI
+      - "15672:15672"
+
+  leave:
+    build: ./leave-microservice
+    ports:
+      - 3002:3002
+    environment:
+      PORT: 3001
+      DB_HOST: mongo_db
+      USER_HOST: user
+      LEAVE_HOST: leave
+      USER_NAME: myuser
+      PASSWORD: mypassword
+      RMQ_HOST: rabbitmq3
+    depends_on:
+      - user
+      - mongo_db
+      - rabbitmq3
+
+  user:
+    build: ./user-microservice
+    ports:
+      - 3000:3000
+    environment:
+      PORT: 3000
+      DB_HOST: mongo_db
+      USER_HOST: user
+      LEAVE_HOST: leave
+      USER_NAME: myuser
+      PASSWORD: mypassword
+      RMQ_HOST: rabbitmq3
+    depends_on:
+      - mongo_db
+      - rabbitmq3
