@@ -5,7 +5,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY, Roles } from './entities/roles.decorator';
+import { ROLES_KEY } from './entities/roles.decorator';
 import { JwtService } from '@nestjs/jwt';
 import { HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';

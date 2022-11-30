@@ -22,8 +22,9 @@ export class LeaveController {
   async applyLeave(@Payload() data: leaveDto, @Ctx() Context: RmqContext) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
+    const result = await this.leaveService.applyLeave(data);
     channel.ack(originalMessage);
-    return await this.leaveService.applyLeave(data);
+    return result;
   }
 
   @MessagePattern({ cmd: 'checkEmployeeLeave' })
@@ -41,23 +42,28 @@ export class LeaveController {
   async viewOwnLeave(@Payload() data: leaveDto, @Ctx() Context: RmqContext) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
+    const result = await this.leaveService.viewOwnLeave(
+      data,
+      data.limit,
+      data.skip,
+    );
     channel.ack(originalMessage);
-    return await this.leaveService.viewOwnLeave(data, data.limit, data.skip);
+    return result;
   }
 
-  @MessagePattern({ cmd: 'viewEmployeePendingLeaveByUserId' })
   async viewEmployeePendingLeaveByUserId(
     @Payload() data: leaveDto,
     @Ctx() Context: RmqContext,
   ) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
-    channel.ack(originalMessage);
-    return await this.leaveService.viewEmployeePendingLeaveByUserId(
+    const result = await this.leaveService.viewEmployeePendingLeaveByUserId(
       data,
       data.limit,
       data.skip,
     );
+    channel.ack(originalMessage);
+    return result;
   }
 
   @MessagePattern({ cmd: 'viewEmployeePendingLeave' })
@@ -67,12 +73,13 @@ export class LeaveController {
   ) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
-    channel.ack(originalMessage);
-    return await this.leaveService.viewEmployeePendingLeave(
+    const result = await this.leaveService.viewEmployeePendingLeave(
       data,
       data.limit,
       data.skip,
     );
+    channel.ack(originalMessage);
+    return result;
   }
 
   @MessagePattern({ cmd: 'approveEmployeeLeaves' })
@@ -82,8 +89,9 @@ export class LeaveController {
   ) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
+    const result = await this.leaveService.approveEmployeeLeaves(data);
     channel.ack(originalMessage);
-    return await this.leaveService.approveEmployeeLeaves(data);
+    return result;
   }
 
   @MessagePattern({ cmd: 'rejectEmployeeLeaves' })
@@ -93,8 +101,9 @@ export class LeaveController {
   ) {
     const channel = Context.getChannelRef();
     const originalMessage = Context.getMessage();
+    const result = await this.leaveService.rejectEmployeeLeaves(data);
     channel.ack(originalMessage);
-    return await this.leaveService.rejectEmployeeLeaves(data);
+    return result;
   }
   @Get()
   async leaveServiceFunction() {

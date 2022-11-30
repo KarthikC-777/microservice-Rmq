@@ -88,6 +88,7 @@ let LeaveService = class LeaveService {
     }
     async viewOwnLeave(data, limitOfDocs = 0, toSkip = 0) {
         try {
+            let formatError = {};
             await this.cacheManager.set('cached_item', { key: 3 });
             await this.cacheManager.get('cached_item');
             const existUser = await this.leaveModel
@@ -96,21 +97,36 @@ let LeaveService = class LeaveService {
                 .limit(limitOfDocs)
                 .exec();
             if (existUser.length < limitOfDocs) {
-                throw new common_1.HttpException('No leaves to show', common_1.HttpStatus.NOT_FOUND);
+                formatError = {
+                    statusCode: common_1.HttpStatus.BAD_REQUEST,
+                    message: 'No leaves to show',
+                    result: [],
+                    error: 'BAD_REQUEST',
+                };
+                throw new common_1.HttpException(formatError, common_1.HttpStatus.BAD_REQUEST);
             }
             if (existUser.length === 0) {
-                throw new common_1.HttpException(`User with the email ${data.email}, Not apllied any leaves`, common_1.HttpStatus.NOT_FOUND);
+                formatError = {
+                    statusCode: common_1.HttpStatus.BAD_REQUEST,
+                    message: `User with the email ${data.email}, Not apllied any leaves`,
+                    result: [],
+                    error: 'BAD_REQUEST',
+                };
+                throw new common_1.HttpException(formatError, common_1.HttpStatus.BAD_REQUEST);
             }
             return {
                 message: `Details of user with status ${data.email}`,
                 result: existUser,
                 status: common_1.HttpStatus.OK,
+                error: 'No Error',
             };
         }
         catch (error) {
             return {
-                status: error.status,
-                message: error.message,
+                statusCode: error.response.statusCode,
+                message: error.response.message,
+                result: error.response.result,
+                error: error.response.error,
             };
         }
     }

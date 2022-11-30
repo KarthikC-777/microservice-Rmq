@@ -15,10 +15,14 @@ export declare class LeaveService {
             _id: import("mongoose").Types.ObjectId;
         })[];
         status: HttpStatus;
+        error: string;
+        statusCode?: undefined;
     } | {
-        status: any;
+        statusCode: any;
         message: any;
-        result?: undefined;
+        result: any;
+        error: any;
+        status?: undefined;
     }>;
     viewEmployeePendingLeaveByUserId(data: leaveDto, limitOfDocs?: number, toSkip?: number): Promise<any>;
     viewEmployeePendingLeave(data: leaveDto, limitOfDocs?: number, toSkip?: number): Promise<any>;

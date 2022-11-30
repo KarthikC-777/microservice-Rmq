@@ -180,9 +180,6 @@ let UserService = class UserService {
     }
     async getEmployee(req, user, limitOfDocs = 0, toSkip = 0) {
         try {
-            await this.cacheManager.set('cached_item', Math.random());
-            const cachedItem = await this.cacheManager.get('cached_item');
-            console.log(cachedItem);
             await this.functionVerify(req.cookies['userlogoutcookie']);
             if (user) {
                 return this.userModel.findOne({ userId: user }, userProjection).exec();
@@ -478,25 +475,36 @@ let UserService = class UserService {
     }
     async viewOwnLeave(req, limit, skip) {
         try {
+            let formatError = {};
             const verifyUser = await this.functionVerify(req.cookies['userlogoutcookie']);
             const pattern = { cmd: 'viewOwnLeave' };
-            const payload = { email: verifyUser.Email, limit: limit, skip: skip };
-            const val = this.leaveClient.send(pattern, payload).pipe((0, rxjs_1.map)((output) => {
+            const payload = {
+                email: verifyUser.Email,
+                limit: limit,
+                skip: skip,
+            };
+            return this.leaveClient.send(pattern, payload).pipe((0, rxjs_1.map)((output) => {
                 if (output.status !== common_1.HttpStatus.OK) {
-                    throw new common_1.HttpException(output.message, output.status);
+                    formatError = {
+                        statusCode: output.statusCode,
+                        message: output.message,
+                        result: output.result,
+                        error: output.error,
+                    };
+                    throw new common_1.HttpException(formatError, output.statusCode);
                 }
                 else {
                     return {
-                        status: output.status,
+                        statusCode: output.statusCode,
                         message: output.message,
                         result: output.result,
+                        error: output.error,
                     };
                 }
             }));
-            return val;
         }
         catch (error) {
-            throw new common_1.HttpException(error.message, error.status);
+            throw new common_1.HttpException(error.response, error.status);
         }
     }
     async viewEmployeePendingLeaveByUserId(req, userId, limit, skip) {
