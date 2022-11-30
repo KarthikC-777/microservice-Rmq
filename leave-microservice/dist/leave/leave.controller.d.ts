@@ -15,10 +15,14 @@ export declare class LeaveController {
             _id: import("mongoose").Types.ObjectId;
         })[];
         status: import("@nestjs/common").HttpStatus;
+        error: string;
+        statusCode?: undefined;
     } | {
-        status: any;
+        statusCode: any;
         message: any;
-        result?: undefined;
+        result: any;
+        error: any;
+        status?: undefined;
     }>;
     viewEmployeePendingLeaveByUserId(data: leaveDto, Context: RmqContext): Promise<any>;
     viewEmployeePendingLeave(data: leaveDto, Context: RmqContext): Promise<any>;

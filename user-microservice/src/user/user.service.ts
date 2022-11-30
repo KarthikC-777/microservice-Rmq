@@ -208,9 +208,6 @@ export class UserService {
     toSkip = 0,
   ): Promise<user | user[]> {
     try {
-      await this.cacheManager.set('cached_item', Math.random());
-      const cachedItem = await this.cacheManager.get('cached_item');
-      console.log(cachedItem);
       await this.functionVerify(req.cookies['userlogoutcookie']);
       if (user) {
         return this.userModel.findOne({ userId: user }, userProjection).exec();
@@ -558,27 +555,38 @@ export class UserService {
 
   async viewOwnLeave(req, limit, skip): Promise<any> {
     try {
+      let formatError = {};
       const verifyUser = await this.functionVerify(
         req.cookies['userlogoutcookie'],
       );
       const pattern = { cmd: 'viewOwnLeave' };
-      const payload = { email: verifyUser.Email, limit: limit, skip: skip };
-      const val = this.leaveClient.send(pattern, payload).pipe(
+      const payload = {
+        email: verifyUser.Email,
+        limit: limit,
+        skip: skip,
+      };
+      return this.leaveClient.send<string>(pattern, payload).pipe(
         map((output: any) => {
           if (output.status !== HttpStatus.OK) {
-            throw new HttpException(output.message, output.status);
-          } else {
-            return {
-              status: output.status,
+            formatError = {
+              statusCode: output.statusCode,
               message: output.message,
               result: output.result,
+              error: output.error,
+            };
+            throw new HttpException(formatError, output.statusCode);
+          } else {
+            return {
+              statusCode: output.statusCode,
+              message: output.message,
+              result: output.result,
+              error: output.error,
             };
           }
         }),
       );
-      return val;
     } catch (error) {
-      throw new HttpException(error.message, error.status);
+      throw new HttpException(error.response, error.status);
     }
   }
 

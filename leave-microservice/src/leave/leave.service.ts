@@ -85,6 +85,7 @@ export class LeaveService {
 
   async viewOwnLeave(data: leaveDto, limitOfDocs = 0, toSkip = 0) {
     try {
+      let formatError = {};
       await this.cacheManager.set('cached_item', { key: 3 });
       await this.cacheManager.get('cached_item');
       const existUser = await this.leaveModel
@@ -93,23 +94,35 @@ export class LeaveService {
         .limit(limitOfDocs)
         .exec();
       if (existUser.length < limitOfDocs) {
-        throw new HttpException('No leaves to show', HttpStatus.NOT_FOUND);
+        formatError = {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'No leaves to show',
+          result: [],
+          error: 'BAD_REQUEST',
+        };
+        throw new HttpException(formatError, HttpStatus.BAD_REQUEST);
       }
       if (existUser.length === 0) {
-        throw new HttpException(
-          `User with the email ${data.email}, Not apllied any leaves`,
-          HttpStatus.NOT_FOUND,
-        );
+        formatError = {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: `User with the email ${data.email}, Not apllied any leaves`,
+          result: [],
+          error: 'BAD_REQUEST',
+        };
+        throw new HttpException(formatError, HttpStatus.BAD_REQUEST);
       }
       return {
         message: `Details of user with status ${data.email}`,
         result: existUser,
         status: HttpStatus.OK,
+        error: 'No Error',
       };
     } catch (error) {
       return {
-        status: error.status,
-        message: error.message,
+        statusCode: error.response.statusCode,
+        message: error.response.message,
+        result: error.response.result,
+        error: error.response.error,
       };
     }
   }

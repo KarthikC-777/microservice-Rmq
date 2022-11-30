@@ -24,8 +24,9 @@ let LeaveController = class LeaveController {
     async applyLeave(data, Context) {
         const channel = Context.getChannelRef();
         const originalMessage = Context.getMessage();
+        const result = await this.leaveService.applyLeave(data);
         channel.ack(originalMessage);
-        return await this.leaveService.applyLeave(data);
+        return result;
     }
     async checkEmployeeLeave(data, Context) {
         const channel = Context.getChannelRef();
@@ -39,32 +40,37 @@ let LeaveController = class LeaveController {
     async viewOwnLeave(data, Context) {
         const channel = Context.getChannelRef();
         const originalMessage = Context.getMessage();
+        const result = await this.leaveService.viewOwnLeave(data, data.limit, data.skip);
         channel.ack(originalMessage);
-        return await this.leaveService.viewOwnLeave(data, data.limit, data.skip);
+        return result;
     }
     async viewEmployeePendingLeaveByUserId(data, Context) {
         const channel = Context.getChannelRef();
         const originalMessage = Context.getMessage();
+        const result = await this.leaveService.viewEmployeePendingLeaveByUserId(data, data.limit, data.skip);
         channel.ack(originalMessage);
-        return await this.leaveService.viewEmployeePendingLeaveByUserId(data, data.limit, data.skip);
+        return result;
     }
     async viewEmployeePendingLeave(data, Context) {
         const channel = Context.getChannelRef();
         const originalMessage = Context.getMessage();
+        const result = await this.leaveService.viewEmployeePendingLeave(data, data.limit, data.skip);
         channel.ack(originalMessage);
-        return await this.leaveService.viewEmployeePendingLeave(data, data.limit, data.skip);
+        return result;
     }
     async approveEmployeeLeaves(data, Context) {
         const channel = Context.getChannelRef();
         const originalMessage = Context.getMessage();
+        const result = await this.leaveService.approveEmployeeLeaves(data);
         channel.ack(originalMessage);
-        return await this.leaveService.approveEmployeeLeaves(data);
+        return result;
     }
     async rejectEmployeeLeaves(data, Context) {
         const channel = Context.getChannelRef();
         const originalMessage = Context.getMessage();
+        const result = await this.leaveService.rejectEmployeeLeaves(data);
         channel.ack(originalMessage);
-        return await this.leaveService.rejectEmployeeLeaves(data);
+        return result;
     }
     async leaveServiceFunction() {
         return 'hi';
@@ -94,7 +100,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], LeaveController.prototype, "viewOwnLeave", null);
 __decorate([
-    (0, microservices_1.MessagePattern)({ cmd: 'viewEmployeePendingLeaveByUserId' }),
     __param(0, (0, microservices_1.Payload)()),
     __param(1, (0, microservices_1.Ctx)()),
     __metadata("design:type", Function),

@@ -30,7 +30,7 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async signup(res, userDto) {
+    async signup(req, res, userDto) {
         res.status(common_1.HttpStatus.CREATED).json({
             statusCode: common_1.HttpStatus.CREATED,
             message: 'Successfully Registered',
@@ -103,9 +103,7 @@ let UserController = class UserController {
         return await this.userService.applyLeave(req, leaveDto);
     }
     async viewOwnLeave(req, { limit, skip }) {
-        return {
-            result: this.userService.viewOwnLeave(req, limit, skip),
-        };
+        return await this.userService.viewOwnLeave(req, limit, skip);
     }
     async viewOwnDetails(req, res) {
         return {
@@ -141,10 +139,11 @@ __decorate([
     }),
     (0, swagger_1.ApiConflictResponse)({ description: 'Email already taken' }),
     (0, swagger_1.ApiInternalServerErrorResponse)({ description: 'Server Error' }),
-    __param(0, (0, common_1.Res)()),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, user_dto_1.UserDto]),
+    __metadata("design:paramtypes", [Object, Object, user_dto_1.UserDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "signup", null);
 __decorate([

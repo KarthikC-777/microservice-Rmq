@@ -13,6 +13,7 @@ import {
   Query,
   Req,
   Res,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { EmployeeDto } from './dto/employee.dto';
@@ -57,7 +58,7 @@ export class UserController {
   })
   @ApiConflictResponse({ description: 'Email already taken' })
   @ApiInternalServerErrorResponse({ description: 'Server Error' })
-  async signup(@Res() res, @Body() userDto: UserDto) {
+  async signup(@Req() req, @Res() res, @Body() userDto: UserDto) {
     res.status(HttpStatus.CREATED).json({
       statusCode: HttpStatus.CREATED,
       message: 'Successfully Registered',
@@ -256,9 +257,7 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'Invalid User' })
   @ApiInternalServerErrorResponse({ description: 'Server Error' })
   async viewOwnLeave(@Req() req, @Query() { limit, skip }: PaginationDto) {
-    return {
-      result: this.userService.viewOwnLeave(req, limit, skip),
-    };
+    return await this.userService.viewOwnLeave(req, limit, skip);
   }
 
   @Get('check-own-details')

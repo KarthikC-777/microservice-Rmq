@@ -12,7 +12,7 @@ import { PaginationDto } from './dto/pagination.dto';
 export declare class UserController {
     private userService;
     constructor(userService: UserService);
-    signup(res: any, userDto: UserDto): Promise<void>;
+    signup(req: any, res: any, userDto: UserDto): Promise<void>;
     signin(req: any, res: any, userDto: loginDto): Promise<void>;
     signout(req: any, res: any): Promise<void>;
     getEmployee(req: any, { userId, limit, skip }: PaginationDto): Promise<{
@@ -30,9 +30,7 @@ export declare class UserController {
     deactivateEmployee(req: any, res: any, userId: string): Promise<void>;
     activateEmployee(req: any, res: any, userId: string): Promise<void>;
     applyLeave(req: any, leaveDto: leaveDto): Promise<any>;
-    viewOwnLeave(req: any, { limit, skip }: PaginationDto): Promise<{
-        result: Promise<any>;
-    }>;
+    viewOwnLeave(req: any, { limit, skip }: PaginationDto): Promise<any>;
     viewOwnDetails(req: any, res: any): Promise<{
         result: Promise<void>;
     }>;
