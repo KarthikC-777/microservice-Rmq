@@ -1,0 +1,1 @@
+{"version":3,"file":"forgot.dto.js","sourceRoot":"","sources":["../../../src/user/dto/forgot.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAC9C,qDAA0C;AAE1C,MAAa,SAAS;CASrB;AARC;IAAC,IAAA,qBAAW,EAAC;QACX,WAAW,EAAE,mBAAmB;QAChC,OAAO,EAAE,gBAAgB;KAC1B,CAAC;IACD,IAAA,yBAAO,EAAC;QACP,OAAO,EAAE,+DAA+D;KACzE,CAAC;;wCACqB;AARzB,8BASC"}
