@@ -18,6 +18,7 @@ const microservices_1 = require("@nestjs/microservices");
 const config_1 = require("../config");
 const jwt_guard_1 = require("./guards/jwt-guard");
 const jwt_strategy_1 = require("./guards/jwt-strategy");
+const cache_manager_redis_store_1 = require("cache-manager-redis-store");
 let UserModule = class UserModule {
 };
 UserModule = __decorate([
@@ -47,8 +48,11 @@ UserModule = __decorate([
             ]),
             common_1.CacheModule.register({
                 isGlobal: true,
-                ttl: 5,
+                ttl: 5000,
                 max: 100,
+                store: cache_manager_redis_store_1.redisStore,
+                host: 'localhost',
+                port: 6379,
             }),
         ],
         providers: [

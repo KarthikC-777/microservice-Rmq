@@ -14,7 +14,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     ]),
     CacheModule.register({
       isGlobal: true,
-      ttl: 40000,
+      ttl: 10000,
       max: 300,
     }),
   ],

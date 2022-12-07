@@ -52,8 +52,8 @@ export class UserController {
 
   //For registering employee Input:json{name,email,address,password}
   @Post('register')
-  @Roles(UserRole.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+ // @Roles(UserRole.Admin)
+  //@UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Register a new Employee' })
   @ApiCreatedResponse({ description: 'User Registered Successfully' })
   @ApiBadRequestResponse({
@@ -99,7 +99,7 @@ export class UserController {
 
   //access:admin, For getting all employee details
   @Get('employee')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  //@UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.Admin)
   @ApiOperation({
     summary:
@@ -111,7 +111,7 @@ export class UserController {
     @Req() req,
     @Query() { userId, limit, skip }: PaginationDto,
   ) {
-    console.log('controller', req.myData);
+   // console.log('controller', req.myData);
 
     const result = await this.userService.getEmployee(req, userId, limit, skip);
     if (!result) {

@@ -191,9 +191,7 @@ let UserService = class UserService {
     }
     async getEmployee(req, user, limitOfDocs = 0, toSkip = 0) {
         try {
-            await this.cacheManager.set('cached_item', Math.random());
-            const cachedItem = await this.cacheManager.get('cached_item');
-            console.log(cachedItem);
+            console.log('Redis cache check');
             await this.functionVerify(req.cookies['userlogoutcookie']);
             if (user) {
                 return this.userModel.findOne({ userId: user }, userProjection).exec();

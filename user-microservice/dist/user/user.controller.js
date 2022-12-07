@@ -136,8 +136,6 @@ let UserController = class UserController {
 };
 __decorate([
     (0, common_1.Post)('register'),
-    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.Admin),
-    (0, common_1.UseGuards)(jwt_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Register a new Employee' }),
     (0, swagger_1.ApiCreatedResponse)({ description: 'User Registered Successfully' }),
     (0, swagger_1.ApiBadRequestResponse)({
@@ -180,7 +178,6 @@ __decorate([
 ], UserController.prototype, "signout", null);
 __decorate([
     (0, common_1.Get)('employee'),
-    (0, common_1.UseGuards)(jwt_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.Admin),
     (0, swagger_1.ApiOperation)({
         summary: 'Getting all employee details or Individual employee detail (Admin Access)',

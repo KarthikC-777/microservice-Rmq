@@ -17,6 +17,7 @@ import {
 } from 'src/config';
 import { JwtAuthGuard } from './guards/jwt-guard';
 import { JwtStrategy } from './guards/jwt-strategy';
+import { redisStore } from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -51,8 +52,11 @@ import { JwtStrategy } from './guards/jwt-strategy';
     ]),
     CacheModule.register({
       isGlobal: true,
-      ttl: 5,
+      ttl: 10000,
       max: 100,
+      store: redisStore,
+      host: 'localhost',
+      port: 6379,
     }),
   ],
   providers: [
